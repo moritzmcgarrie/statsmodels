@@ -33,8 +33,6 @@ def indicators(x, eps=None, d=1.5):
         if epsilon is omitted, specifies the distance multiplier to use when
         computing it
     """
-    # Cache the indicators: I(x_i,x_j) = 1 if |x_i - x_j| < eps
-    #                                  = 0 otherwise
     T = len(x)
 
     #TODO: add functionality to select epsilon optimally
@@ -43,7 +41,7 @@ def indicators(x, eps=None, d=1.5):
     if eps is None:
         eps = d*x.std(ddof=1)
 
-    I = np.zeros((T, T), dtype=np.int8)     # Use bool for better storage
+    I = np.zeros((T, T), dtype=np.int8)     # Use int8 for better storage
     for i in range(T):                      # i is a "row" of matrix I
         I[i, i] = True                      # |x_i - x_i| < eps is always True
         for j in range(i+1, T):             # j is a "column" of matrix I
@@ -56,7 +54,7 @@ def CI(I, m, Tm=None):
     Parameters
     ----------
     I : 2d array
-        upper triangular matrix of indicators
+        matrix of indicators
     m : integer
         embedding dimension
     """
@@ -73,12 +71,10 @@ def CI(I, m, Tm=None):
 
 def K(I):
     """
-    This is correct!
-
     Parameters
     ----------
     I : 2d array
-        upper triangular matrix of indicators
+        matrix of indicators
     m : integer
         embedding dimension
     """
@@ -96,7 +92,7 @@ def V2(I, m):
     Parameters
     ----------
     I : 2d array
-        upper triangular matrix of indicators
+        matrix of indicators
     m : integer
         embedding dimension
     """
