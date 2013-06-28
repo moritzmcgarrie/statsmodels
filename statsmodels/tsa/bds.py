@@ -164,6 +164,6 @@ def bds(x, embedding_dim=2, epsilon=None, distance=1.5):
     bds_stat = np.sqrt(nobs) * effect / sd
 
     # Calculate the p-value (two-tailed test)
-    pvalue = 2*stats.norm.sf(bds_stat)
+    pvalue = 2*stats.norm.sf(np.abs(bds_stat))
 
     return bds_stat, pvalue
