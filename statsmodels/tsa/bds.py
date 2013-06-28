@@ -24,15 +24,22 @@ from scipy import stats
 
 def distance_indicators(x, epsilon=None, distance=1.5):
     """
+    Calculate all pairwise threshold distance indicators for a time series
+
     Parameters
     ----------
     x : 1d array
         observations of time series for which bds statistics is calculated
     epsilon : scalar, optional
-        the threshold distance to use in calculating the correlation sum
+        the threshold distance to use in calculating the heaviside indicators
     distance : scalar, optional
         if epsilon is omitted, specifies the distance multiplier to use when
         computing it
+
+    Returns
+    -------
+    indicators : 2d array
+        matrix of distance threshold indicators
 
     Notes
     -----
@@ -64,12 +71,21 @@ def distance_indicators(x, epsilon=None, distance=1.5):
 
 def correlation_sum(indicators, embedding_dim):
     """
+    Calculate a correlation sum
+
+    Useful as an estimator of a correlation integral
+
     Parameters
     ----------
     indicators : 2d array
         matrix of distance threshold indicators
     embedding_dim : integer
         embedding dimension
+
+    Returns
+    -------
+    corrsumm : float
+        Correlation sum
     """
     nobs_full = len(indicators)
     # We need to condition on m initial values to practically implement this
@@ -87,12 +103,20 @@ def correlation_sum(indicators, embedding_dim):
     return 2 * val / (nobs * (nobs - 1))
 
 
+#TODO rework this
 def _k(indicators):
     """
+    Calculate k
+
     Parameters
     ----------
-    I : 2d array
+    indicators : 2d array
         matrix of distance threshold indicators
+
+    Returns
+    -------
+    k : float
+        k
     """
     nobs_full = len(indicators)
 
@@ -111,12 +135,19 @@ def _k(indicators):
 
 def _var(indicators, embedding_dim):
     """
+    Calculate the variance of a BDS effect
+
     Parameters
     ----------
     indicators : 2d array
         matrix of distance threshold indicators
     embedding_dim : integer
         embedding dimension
+
+    Returns
+    -------
+    variance : float
+        Variance of BDS effect
 
     Notes
     -----
@@ -139,6 +170,8 @@ def _var(indicators, embedding_dim):
 
 def bds(x, embedding_dim=2, epsilon=None, distance=1.5):
     """
+    Calculate the BDS test statistic for a time series
+
     Parameters
     ----------
     x : 1d array
@@ -150,6 +183,13 @@ def bds(x, embedding_dim=2, epsilon=None, distance=1.5):
     distance : scalar, optional
         if epsilon is omitted, specifies the distance multiplier to use when
         computing it
+
+    Returns
+    -------
+    bds_stat : float
+        The BDS statistic
+    pvalue : float
+        The p-values associated with the BDS statistic
 
     Notes
     -----
