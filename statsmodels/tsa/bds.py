@@ -41,6 +41,13 @@ def distance_indicators(x, epsilon=None, distance=1.5):
     """
     nobs_full = len(x)
 
+    if epsilon is not None and epsilon <= 0:
+        raise ValueError("Threshold distance must be positive if specified." \
+                         " Got epsilon of %f" % epsilon)
+    if distance <= 0:
+        raise ValueError("Threshold distance must be positive." \
+                         " Got distance multiplier %f" % distance)
+
     #TODO: add functionality to select epsilon optimally
     #TODO: and/or compute for a range of epsilons in [0.5*s, 2.0*s]?
     #      or [1.5*s, 2.0*s]?
@@ -67,6 +74,11 @@ def correlation_sum(indicators, embedding_dim):
     nobs_full = len(indicators)
     # We need to condition on m initial values to practically implement this
     nobs = nobs_full - (embedding_dim - 1)
+
+    if not indicators.ndim == 2:
+        raise ValueError('Indicators must be a matrix')
+    if not indicators.shape[0] == indicators.shape[1]:
+        raise ValueError('Indicator matrix must be symmetric (square)')
 
     val = 0
     for s in range(embedding_dim, nobs_full+1):
@@ -146,7 +158,12 @@ def bds(x, embedding_dim=2, epsilon=None, distance=1.5):
     required to calculate the m-histories:
     x_t^m = (x_t, x_{t-1}, ... x_{t-(m-1)})
     """
-    nobs = len(x) - (embedding_dim - 1)
+    nobs_full = len(x)
+    nobs = nobs_full - (embedding_dim - 1)
+
+    if embedding_dim < 2 or embedding_dim >= nobs_full:
+        raise ValueError("Embedding dimension must be in the range" \
+                         " [2,len(x)-1]. Got %d." % embedding_dim)
 
     # Cache the indicators
     indicators = distance_indicators(x, epsilon, distance)
