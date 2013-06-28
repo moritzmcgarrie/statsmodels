@@ -6,7 +6,7 @@ References
 
 Broock, W. A., J. A. Scheinkman, W. D. Dechert, and B. LeBaron. 1996.
 "A Test for Independence Based on the Correlation Dimension."
-Econometric Reviews 15 (3): 197–235.
+Econometric Reviews 15 (3): 197-235.
 
 Kanzler, Ludwig. 1999.
 "Very Fast and Correctly Sized Estimation of the BDS Statistic".
@@ -17,128 +17,153 @@ LeBaron, Blake. 1997.
 Studies in Nonlinear Dynamics & Econometrics 2 (2) (January 1).
 """
 
+from __future__ import division
 import numpy as np
 from scipy import stats
 
 
-def indicators(x, eps=None, d=1.5):
+def distance_indicators(x, epsilon=None, distance=1.5):
     """
     Parameters
     ----------
     x : 1d array
         observations of time series for which bds statistics is calculated
-    eps : scalar, optional
-        epsilon
-    d : scalar, optional
+    epsilon : scalar, optional
+        the threshold distance to use in calculating the correlation sum
+    distance : scalar, optional
         if epsilon is omitted, specifies the distance multiplier to use when
         computing it
+
+    Notes
+    -----
+
+    Since this can be a very large matrix, use np.int8 to save some space.
     """
-    T = len(x)
+    nobs_full = len(x)
 
     #TODO: add functionality to select epsilon optimally
     #TODO: and/or compute for a range of epsilons in [0.5*s, 2.0*s]?
     #      or [1.5*s, 2.0*s]?
-    if eps is None:
-        eps = d*x.std(ddof=1)
+    if epsilon is None:
+        epsilon = distance * x.std(ddof=1)
 
-    I = np.zeros((T, T), dtype=np.int8)     # Use int8 for better storage
-    for i in range(T):                      # i is a "row" of matrix I
-        I[i, i] = True                      # |x_i - x_i| < eps is always True
-        for j in range(i+1, T):             # j is a "column" of matrix I
-            I[j, i] = I[i, j] = np.abs(x[i] - x[j]) < eps
-    return I
+    indicators = np.zeros((nobs_full, nobs_full), dtype=np.int8)
+    for i in range(nobs_full):           # i is a "row" of matrix I
+        indicators[i, i] = 1             # |x_i-x_i| < epsilon always True
+        for j in range(i+1, nobs_full):  # j is a "column" of matrix I
+            indicators[j, i] = indicators[i, j] = np.abs(x[i] - x[j]) < epsilon
+    return indicators
 
 
-def CI(I, m, Tm=None):
+def correlation_sum(indicators, embedding_dim):
     """
     Parameters
     ----------
-    I : 2d array
-        matrix of indicators
-    m : integer
+    indicators : 2d array
+        matrix of distance threshold indicators
+    embedding_dim : integer
         embedding dimension
     """
-    T = len(I)
+    nobs_full = len(indicators)
     # We need to condition on m initial values to practically implement this
-    Tm = T - (m-1)
+    nobs = nobs_full - (embedding_dim - 1)
 
     val = 0
-    for s in range(m, T+1):
-        for t in range(s+1, T+1):
-            val += np.product(I.diagonal(t-s)[s-m:s])
-    return 2*val / (Tm*(Tm-1))
+    for s in range(embedding_dim, nobs_full+1):
+        for t in range(s+1, nobs_full+1):
+            val += np.product(indicators.diagonal(t - s)[s - embedding_dim:s])
+    return 2 * val / (nobs * (nobs - 1))
 
 
-def K(I):
+def _k(indicators):
     """
     Parameters
     ----------
     I : 2d array
-        matrix of indicators
-    m : integer
-        embedding dimension
+        matrix of distance threshold indicators
     """
-    T = len(I)
+    nobs_full = len(indicators)
+
     val = 0
-    for t in range(0, T):
-        for s in range(t+1, T):
-            for r in range(s+1, T):
-                val += (I[t, s]*I[s, r] + I[t, r]*I[r, s] + I[s, t]*I[t, r])/3
-    return 6*val/(T*(T-1)*(T-2))
+    for t in range(0, nobs_full):
+        for s in range(t+1, nobs_full):
+            for r in range(s+1, nobs_full):
+                val += (1/3)*(
+                    indicators[t, s]*indicators[s, r] +
+                    indicators[t, r]*indicators[r, s] +
+                    indicators[s, t]*indicators[t, r]
+                )
+
+    return 6 * val / (nobs_full * (nobs_full - 1) * (nobs_full - 2))
 
 
-def V2(I, m):
+def _var(indicators, embedding_dim):
     """
     Parameters
     ----------
-    I : 2d array
-        matrix of indicators
-    m : integer
+    indicators : 2d array
+        matrix of distance threshold indicators
+    embedding_dim : integer
         embedding dimension
-    """
-    T = len(I)
 
-    c = CI(I, 1)
-    k = K(I)
+    Notes
+    -----
+
+    """
+    corrsum_1dim = correlation_sum(indicators, 1)
+    k = _k(indicators)
 
     tmp = 0
-    for j in range(1, m):
-        tmp += (k**(m-j))*(c**(2*j))
+    for j in range(1, embedding_dim):
+        tmp += (k**(embedding_dim - j))*(corrsum_1dim**(2 * j))
 
-    return 4*(k**m + 2*tmp + ((m-1)**2)*(c**(2*m)) - (m**2)*k*(c**(2*m-2)))
+    return 4 * (
+        k**embedding_dim +
+        2 * tmp +
+        ((embedding_dim - 1)**2) * (corrsum_1dim**(2 * embedding_dim)) -
+        (embedding_dim**2) * k * (corrsum_1dim**(2 * embedding_dim - 2))
+    )
 
 
-def bds(x, m=2, eps=None, d=1.5):
+def bds(x, embedding_dim=2, epsilon=None, distance=1.5):
     """
     Parameters
     ----------
     x : 1d array
         observations of time series for which bds statistics is calculated
-    m : integer
+    embedding_dim : integer
         embedding dimension
-    eps : scalar, optional
-        epsilon
-    d : scalar, optional
+    epsilon : scalar, optional
+        the threshold distance to use in calculating the correlation sum
+    distance : scalar, optional
         if epsilon is omitted, specifies the distance multiplier to use when
         computing it
+
+    Notes
+    -----
+
+    Implementation conditions on the first m-1 initial values, which are
+    required to calculate the m-histories:
+    x_t^m = (x_t, x_{t-1}, ... x_{t-(m-1)})
     """
-    T = len(x)
-    # We need to condition on m initial values to practically implement this
-    Tm = T - (m-1)
+    nobs = len(x) - (embedding_dim - 1)
 
     # Cache the indicators
-    I = indicators(x, eps, d)
+    indicators = distance_indicators(x, epsilon, distance)
 
-    # Get the intermediate values
-    C_1T = CI(I[:-1, :-1], 1)  # See Kanzler footnote 10 for why I is truncated
-    C_mT = CI(I, m)
-    T_mT = C_mT - (C_1T**m)
-    V_mT = np.sqrt(V2(I, m))
+    # Get the estimates of the correlation integrals
+    # (see Kanzler footnote 10 for why indicators are truncated in 1dim case)
+    corrsum_1dim = correlation_sum(indicators[:-1, :-1], 1)
+    corrsum_mdim = correlation_sum(indicators, embedding_dim)
 
-    # Calculate the statistic: W_mT ~ N(0,1)
-    W_mT = np.sqrt(Tm) * T_mT / V_mT
+    # Get the intermediate values for the statistic
+    effect = corrsum_mdim - (corrsum_1dim**embedding_dim)
+    sd = np.sqrt(_var(indicators, embedding_dim))
+
+    # Calculate the statistic: bds_stat ~ N(0,1)
+    bds_stat = np.sqrt(nobs) * effect / sd
 
     # Calculate the p-value (two-tailed test)
-    pvalue = 2*stats.norm.sf(W_mT)
+    pvalue = 2*stats.norm.sf(bds_stat)
 
-    return W_mT, pvalue
+    return bds_stat, pvalue
