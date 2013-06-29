@@ -199,7 +199,8 @@ def bds(x, embedding_dim=2, epsilon=None, distance=1.5):
     x_t^m = (x_t, x_{t-1}, ... x_{t-(m-1)})
     """
     nobs_full = len(x)
-    nobs = nobs_full - (embedding_dim - 1)
+    ninitial = (embedding_dim - 1)
+    nobs = nobs_full - ninitial
 
     if embedding_dim < 2 or embedding_dim >= nobs_full:
         raise ValueError("Embedding dimension must be in the range"
@@ -210,7 +211,7 @@ def bds(x, embedding_dim=2, epsilon=None, distance=1.5):
 
     # Get the estimates of the correlation integrals
     # (see Kanzler footnote 10 for why indicators are truncated in 1dim case)
-    corrsum_1dim = correlation_sum(indicators[:-1, :-1], 1)
+    corrsum_1dim = correlation_sum(indicators[ninitial:, ninitial:], 1)
     corrsum_mdim = correlation_sum(indicators, embedding_dim)
 
     # Get the intermediate values for the statistic
