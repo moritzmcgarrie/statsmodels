@@ -84,24 +84,26 @@ def correlation_sum(indicators, embedding_dim):
 
     Returns
     -------
-    corrsumm : float
+    corrsum : float
         Correlation sum
-    """
-    nobs_full = len(indicators)
-    # We need to condition on m initial values to practically implement this
-    nobs = nobs_full - (embedding_dim - 1)
+    indicators_joint
+        matrix of joint-distance-threshold indicators
 
+    """
     if not indicators.ndim == 2:
         raise ValueError('Indicators must be a matrix')
     if not indicators.shape[0] == indicators.shape[1]:
         raise ValueError('Indicator matrix must be symmetric (square)')
 
-    val = 0
-    for s in range(embedding_dim, nobs_full+1):
-        for t in range(s+1, nobs_full+1):
-            val += np.product(indicators.diagonal(t - s)[s - embedding_dim:s])
-    return 2 * val / (nobs * (nobs - 1))
-
+    if embedding_dim == 1:
+        indicators_joint = indicators
+    else:
+        corrsum, indicators = correlation_sum(indicators, embedding_dim - 1)
+        indicators_joint = indicators[1:,1:]*indicators[:-1,:-1]
+    
+    nobs = len(indicators_joint)
+    corrsum = np.mean(indicators_joint[np.triu_indices(nobs, 1)])
+    return corrsum, indicators_joint
 
 #TODO rework this
 def _k(indicators):
@@ -153,7 +155,7 @@ def _var(indicators, embedding_dim):
     -----
 
     """
-    corrsum_1dim = correlation_sum(indicators, 1)
+    corrsum_1dim, _ = correlation_sum(indicators, 1)
     k = _k(indicators)
 
     tmp = 0
@@ -211,8 +213,8 @@ def bds(x, embedding_dim=2, epsilon=None, distance=1.5):
 
     # Get the estimates of the correlation integrals
     # (see Kanzler footnote 10 for why indicators are truncated in 1dim case)
-    corrsum_1dim = correlation_sum(indicators[ninitial:, ninitial:], 1)
-    corrsum_mdim = correlation_sum(indicators, embedding_dim)
+    corrsum_1dim, _ = correlation_sum(indicators[ninitial:, ninitial:], 1)
+    corrsum_mdim, _ = correlation_sum(indicators, embedding_dim)
 
     # Get the intermediate values for the statistic
     effect = corrsum_mdim - (corrsum_1dim**embedding_dim)
