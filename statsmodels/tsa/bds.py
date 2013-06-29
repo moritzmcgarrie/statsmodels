@@ -49,10 +49,10 @@ def distance_indicators(x, epsilon=None, distance=1.5):
     nobs_full = len(x)
 
     if epsilon is not None and epsilon <= 0:
-        raise ValueError("Threshold distance must be positive if specified." \
+        raise ValueError("Threshold distance must be positive if specified."
                          " Got epsilon of %f" % epsilon)
     if distance <= 0:
-        raise ValueError("Threshold distance must be positive." \
+        raise ValueError("Threshold distance must be positive."
                          " Got distance multiplier %f" % distance)
 
     #TODO: add functionality to select epsilon optimally
@@ -202,7 +202,7 @@ def bds(x, embedding_dim=2, epsilon=None, distance=1.5):
     nobs = nobs_full - (embedding_dim - 1)
 
     if embedding_dim < 2 or embedding_dim >= nobs_full:
-        raise ValueError("Embedding dimension must be in the range" \
+        raise ValueError("Embedding dimension must be in the range"
                          " [2,len(x)-1]. Got %d." % embedding_dim)
 
     # Cache the indicators
