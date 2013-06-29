@@ -105,35 +105,6 @@ def correlation_sum(indicators, embedding_dim):
     corrsum = np.mean(indicators_joint[np.triu_indices(nobs, 1)])
     return corrsum, indicators_joint
 
-#TODO rework this
-def _k(indicators):
-    """
-    Calculate k
-
-    Parameters
-    ----------
-    indicators : 2d array
-        matrix of distance threshold indicators
-
-    Returns
-    -------
-    k : float
-        k
-    """
-    nobs = len(indicators)
-
-    val = 0
-    for t in range(0, nobs):
-        for s in range(t+1, nobs):
-            for r in range(s+1, nobs):
-                val += (1/3)*(
-                    indicators[t, s]*indicators[s, r] +
-                    indicators[t, r]*indicators[r, s] +
-                    indicators[s, t]*indicators[t, r]
-                )
-
-    return 6 * val / (nobs * (nobs - 1) * (nobs - 2))
-
 
 def _var(indicators, embedding_dim):
     """
@@ -155,8 +126,13 @@ def _var(indicators, embedding_dim):
     -----
 
     """
+    nobs = len(indicators)
     corrsum_1dim, _ = correlation_sum(indicators, 1)
-    k = _k(indicators)
+    k = (
+        (indicators.sum(1)**2).sum() -
+        3*I.sum() +
+        2*nobs
+    ) / (nobs * (nobs - 1) * (nobs - 2))
 
     tmp = 0
     for j in range(1, embedding_dim):
