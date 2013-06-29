@@ -46,7 +46,7 @@ def distance_indicators(x, epsilon=None, distance=1.5):
 
     Since this can be a very large matrix, use np.int8 to save some space.
     """
-    nobs_full = len(x)
+    nobs = len(x)
 
     if epsilon is not None and epsilon <= 0:
         raise ValueError("Threshold distance must be positive if specified."
@@ -61,10 +61,10 @@ def distance_indicators(x, epsilon=None, distance=1.5):
     if epsilon is None:
         epsilon = distance * x.std(ddof=1)
 
-    indicators = np.zeros((nobs_full, nobs_full), dtype=np.int8)
-    for i in range(nobs_full):           # i is a "row" of matrix I
-        indicators[i, i] = 1             # |x_i-x_i| < epsilon always True
-        for j in range(i+1, nobs_full):  # j is a "column" of matrix I
+    indicators = np.zeros((nobs, nobs), dtype=np.int8)
+    for i in range(nobs):           # i is a "row" of matrix I
+        indicators[i, i] = 1        # |x_i - x_i| < epsilon always True
+        for j in range(i+1, nobs):  # j is a "column" of matrix I
             indicators[j, i] = indicators[i, j] = np.abs(x[i] - x[j]) < epsilon
     return indicators
 
@@ -120,19 +120,19 @@ def _k(indicators):
     k : float
         k
     """
-    nobs_full = len(indicators)
+    nobs = len(indicators)
 
     val = 0
-    for t in range(0, nobs_full):
-        for s in range(t+1, nobs_full):
-            for r in range(s+1, nobs_full):
+    for t in range(0, nobs):
+        for s in range(t+1, nobs):
+            for r in range(s+1, nobs):
                 val += (1/3)*(
                     indicators[t, s]*indicators[s, r] +
                     indicators[t, r]*indicators[r, s] +
                     indicators[s, t]*indicators[t, r]
                 )
 
-    return 6 * val / (nobs_full * (nobs_full - 1) * (nobs_full - 2))
+    return 6 * val / (nobs * (nobs - 1) * (nobs - 2))
 
 
 def _var(indicators, embedding_dim):
