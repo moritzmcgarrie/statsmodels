@@ -47,6 +47,7 @@ def distance_indicators(x, epsilon=None, distance=1.5):
 
     Since this can be a very large matrix, use np.int8 to save some space.
     """
+    x = np.asarray(x)
     nobs = len(x)
 
     if epsilon is not None and epsilon <= 0:
@@ -62,12 +63,7 @@ def distance_indicators(x, epsilon=None, distance=1.5):
     if epsilon is None:
         epsilon = distance * x.std(ddof=1)
 
-    indicators = np.zeros((nobs, nobs), dtype=np.int8)
-    for i in range(nobs):           # i is a "row" of matrix I
-        indicators[i, i] = 1        # |x_i - x_i| < epsilon always True
-        for j in range(i+1, nobs):  # j is a "column" of matrix I
-            indicators[j, i] = indicators[i, j] = np.abs(x[i] - x[j]) < epsilon
-    return indicators
+    return np.abs(x[:, None] - x) < epsilon
 
 
 def correlation_sum(indicators, embedding_dim):
