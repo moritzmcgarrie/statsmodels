@@ -1,3 +1,22 @@
+%
+% BDS test for IID time series
+%
+% Calculates and outputs BDS test statistics and p-values for several
+% datasets.
+%
+% Requires bds function, from Kanzler.
+%
+% References
+% ----------
+%
+% Kanzler, Ludwig. 1998.
+% BDS: MATLAB Module to Calculate Brock, Dechert & Scheinkman Test for
+% Independence.
+% Statistical Software Components. Boston College Department of Economics.
+% http://ideas.repec.org/c/boc/bocode/t871803.html.
+%
+%
+
 in = csvread('bds_data.csv');
 
 sequence = in(1:25,1);
