@@ -29,7 +29,8 @@ def distance_indicators(x, epsilon=None, distance=1.5):
     Parameters
     ----------
     x : 1d array
-        observations of time series for which bds statistics is calculated
+        observations of time series for which heaviside distance indicators
+        are calculated
     epsilon : scalar, optional
         the threshold distance to use in calculating the heaviside indicators
     distance : scalar, optional
