@@ -203,6 +203,7 @@ def bds(x, max_dim=2, epsilon=None, distance=1.5):
     required to calculate the m-histories:
     x_t^m = (x_t, x_{t-1}, ... x_{t-(m-1)})
     """
+    x = np.asarray(x)
     nobs_full = len(x)
 
     if max_dim < 2 or max_dim >= nobs_full:
