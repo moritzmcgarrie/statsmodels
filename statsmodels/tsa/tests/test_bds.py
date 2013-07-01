@@ -27,15 +27,16 @@ DECIMAL_3 = 3
 DECIMAL_2 = 2
 DECIMAL_1 = 1
 
-data_file = os.path.dirname(os.path.abspath(__file__))+\
-            "/results/bds_data.csv"
+data_file = os.path.dirname(os.path.abspath(__file__)) + \
+    "/results/bds_data.csv"
 data = pd.DataFrame(genfromtxt(open(data_file, "rb"),
-            delimiter=",", dtype=float))
+                    delimiter=",", dtype=float))
 
-res_file = os.path.dirname(os.path.abspath(__file__))+\
-            "/results/bds_results.csv"
+res_file = os.path.dirname(os.path.abspath(__file__)) + \
+    "/results/bds_results.csv"
 results = pd.DataFrame(genfromtxt(open(res_file, "rb"),
-            delimiter=",", dtype=float))
+                                  delimiter=",", dtype=float))
+
 
 class CheckBDS(object):
     """
@@ -43,7 +44,6 @@ class CheckBDS(object):
 
     Test values from Kanzler's MATLAB program bds.
     """
-    
     def test_stat(self):
         assert_almost_equal(self.res[0], self.bds_stats, DECIMAL_8)
 
