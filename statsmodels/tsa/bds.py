@@ -131,6 +131,7 @@ def _var(indicators, embedding_dim):
     k = (
         (indicators.sum(1)**2).sum() -
         3*I.sum() +
+        3*indicators_joint.sum() +
         2*nobs
     ) / (nobs * (nobs - 1) * (nobs - 2))
 
