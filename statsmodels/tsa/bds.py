@@ -199,8 +199,8 @@ def bds(x, max_dim=2, epsilon=None, distance=1.5):
     Notes
     -----
 
-    This calculation involves matrices of size (nobs, nobs), so we don't want
-    to use this with nobs > 10000 (if you have daily or high frequency data).
+    This calculation involves matrices of size (nobs, nobs), so this test
+    will not work with very long datasets.
 
     Implementation conditions on the first m-1 initial values, which are
     required to calculate the m-histories:
