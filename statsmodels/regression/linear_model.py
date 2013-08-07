@@ -90,7 +90,7 @@ class RegressionModel(base.LikelihoodModel):
         self.df_resid = self.nobs - self.rank
         self.df_model = float(rank(self.exog) - self.k_constant)
 
-    def fit(self, method="pinv", **kwargs):
+    def _fit(self, method="pinv", **kwargs):
         """
         Full fit of the model.
 
@@ -141,6 +141,38 @@ class RegressionModel(base.LikelihoodModel):
             # used in ANOVA
             self.effects = effects = np.dot(Q.T, endog)
             beta = np.linalg.solve(R, effects)
+
+            # no upper triangular solve routine in numpy/scipy?
+        return beta
+
+    def fit(self, method="pinv", **kwargs):
+        """
+        Full fit of the model.
+
+        The results include an estimate of covariance matrix, (whitened)
+        residuals and an estimate of scale.
+
+        Parameters
+        ----------
+        method : str
+            Can be "pinv", "qr".  "pinv" uses the Moore-Penrose pseudoinverse
+            to solve the least squares problem. "qr" uses the QR
+            factorization.
+
+        Returns
+        -------
+        A RegressionResults class instance.
+
+        See Also
+        ---------
+        regression.RegressionResults
+
+        Notes
+        -----
+        The fit method uses the pseudoinverse of the design/exogenous variables
+        to solve the least squares minimization.
+        """
+        beta = self._fit(method, **kwargs)
 
             # no upper triangular solve routine in numpy/scipy?
         if isinstance(self, OLS):
