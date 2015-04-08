@@ -38,7 +38,8 @@ class TestSARIMAXStatsmodels(object):
         self.model_b = sarimax.SARIMAX(endog, order=(1, 1, 1), trend='c',
                                        simple_differencing=True,
                                        hamilton_representation=True)
-        self.result_b = self.model_b.fit(disp=-1)
+        self.result_b = self.model_b.fit(disp=-1,
+                                         information_matrix_type='oim')
 
     def test_loglike(self):
         assert_allclose(self.result_b.llf, self.result_a.llf)
@@ -148,12 +149,12 @@ class TestARIMAStationary(ARIMA):
 
     def test_bse(self):
         assert_allclose(
-            self.result.bse[1], self.true['se_ar_oim'],
+            self.result.bse[1], self.true['se_ar_opg'],
             atol=1e-3,
         )
         assert_allclose(
-            self.result.bse[2], self.true['se_ma_oim'],
-            atol=1e-3, rtol=1e-2
+            self.result.bse[2], self.true['se_ma_opg'],
+            atol=1e-3,
         )
 
 
@@ -165,12 +166,12 @@ class TestARIMADiffuse(ARIMA):
 
     def test_bse(self):
         assert_allclose(
-            self.result.bse[1], self.true['se_ar_oim'],
-            atol=1e-1,
+            self.result.bse[1], self.true['se_ar_opg'],
+            atol=1e-3,
         )
         assert_allclose(
-            self.result.bse[2], self.true['se_ma_oim'],
-            atol=1e-1, rtol=1e-1
+            self.result.bse[2], self.true['se_ma_opg'],
+            atol=1e-3,
         )
 
 
@@ -216,11 +217,11 @@ class TestAdditiveSeasonal(AdditiveSeasonal):
 
     def test_bse(self):
         assert_allclose(
-            self.result.bse[1], self.true['se_ar_oim'],
-            atol=1e-3, rtol=1e-2
+            self.result.bse[1], self.true['se_ar_opg'],
+            atol=1e-3,
         )
         assert_allclose(
-            self.result.bse[2:4], self.true['se_ma_oim'],
+            self.result.bse[2:4], self.true['se_ma_opg'],
             atol=1e-3,
         )
 
@@ -265,11 +266,11 @@ class TestAirlineHamilton(Airline):
 
     def test_bse(self):
         assert_allclose(
-            self.result.bse[0], self.true['se_ma_oim'],
+            self.result.bse[0], self.true['se_ma_opg'],
             atol=1e-4,
         )
         assert_allclose(
-            self.result.bse[1], self.true['se_seasonal_ma_oim'],
+            self.result.bse[1], self.true['se_seasonal_ma_opg'],
             atol=1e-3,
         )
 
@@ -283,11 +284,11 @@ class TestAirlineHarvey(Airline):
 
     def test_bse(self):
         assert_allclose(
-            self.result.bse[0], self.true['se_ma_oim'],
-            atol=1e-2,
+            self.result.bse[0], self.true['se_ma_opg'],
+            atol=1e-3,
         )
         assert_allclose(
-            self.result.bse[1], self.true['se_seasonal_ma_oim'],
+            self.result.bse[1], self.true['se_seasonal_ma_opg'],
             atol=1e-3,
         )
 
@@ -318,11 +319,11 @@ class TestAirlineStateDifferencing(Airline):
 
     def test_bse(self):
         assert_allclose(
-            self.result.bse[0], self.true['se_ma_oim'],
+            self.result.bse[0], self.true['se_ma_opg'],
             atol=1e-3,
         )
         assert_allclose(
-            self.result.bse[1], self.true['se_seasonal_ma_oim'],
+            self.result.bse[1], self.true['se_seasonal_ma_opg'],
             atol=1e-4,
         )
 
@@ -368,19 +369,19 @@ class TestFriedmanMLERegression(Friedman):
 
     def test_bse(self):
         assert_allclose(
-            self.result.bse[0], self.true['se_exog_oim'][0],
-            rtol=3e-1
+            self.result.bse[0], self.true['se_exog_opg'][0],
+            rtol=1e-1
         )
         assert_allclose(
-            self.result.bse[1], self.true['se_exog_oim'][1],
+            self.result.bse[1], self.true['se_exog_opg'][1],
             atol=1e-2,
         )
         assert_allclose(
-            self.result.bse[2], self.true['se_ar_oim'],
-            atol=1e-1,
+            self.result.bse[2], self.true['se_ar_opg'],
+            atol=1e-2,
         )
         assert_allclose(
-            self.result.bse[3], self.true['se_ma_oim'],
+            self.result.bse[3], self.true['se_ma_opg'],
             atol=1e-2,
         )
 
@@ -393,7 +394,7 @@ class TestFriedmanStateRegression(Friedman):
         exog = add_constant(true['data']['m2']) / 10.
 
         true['mle_params_exog'] = true['params_exog'][:]
-        true['mle_se_exog'] = true['se_exog_oim'][:]
+        true['mle_se_exog'] = true['se_exog_opg'][:]
 
         true['params_exog'] = []
         true['se_exog'] = []
@@ -438,12 +439,12 @@ class TestFriedmanStateRegression(Friedman):
 
     def test_bse(self):
         assert_allclose(
-            self.result.bse[0], self.true['se_ar_oim'],
-            atol=1e-1,
+            self.result.bse[0], self.true['se_ar_opg'],
+            atol=1e-2
         )
         assert_allclose(
-            self.result.bse[1], self.true['se_ma_oim'],
-            atol=1e-2,
+            self.result.bse[1], self.true['se_ma_opg'],
+            atol=1e-2
         )
 
 
