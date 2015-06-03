@@ -9,11 +9,13 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 from .representation import Representation
 from .kalman_filter import KalmanFilter
+from .kalman_smoother import KalmanSmoother
 
 import statsmodels.tsa.base.tsa_model as tsbase
 
 
-class Model(KalmanFilter, Representation, tsbase.TimeSeriesModel):
+class Model(KalmanSmoother, KalmanFilter, Representation,
+            tsbase.TimeSeriesModel):
     """
     State space representation of a time series process, with Kalman filter and
     Statsmodels integration.
@@ -47,6 +49,7 @@ class Model(KalmanFilter, Representation, tsbase.TimeSeriesModel):
     --------
     statsmodels.tsa.statespace.tsa.base.tsa_model.TimeSeriesModel
     statsmodels.tsa.statespace.mlemodel.MLEModel
+    statsmodels.tsa.statespace.kalman_filter.KalmanSmoother
     statsmodels.tsa.statespace.kalman_filter.KalmanFilter
     statsmodels.tsa.statespace.representation.Representation
     """

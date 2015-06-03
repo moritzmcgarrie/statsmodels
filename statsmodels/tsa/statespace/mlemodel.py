@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
-from .kalman_filter import FilterResults
+from .kalman_smoother import SmootherResults
 
 import statsmodels.tsa.base.tsa_model as tsbase
 from .model import Model
@@ -575,7 +575,7 @@ class MLEModel(Model):
         raise NotImplementedError
 
 
-class MLEResults(FilterResults, tsbase.TimeSeriesModelResults):
+class MLEResults(SmootherResults, tsbase.TimeSeriesModelResults):
     r"""
     Class to hold results from fitting a state space model.
 
